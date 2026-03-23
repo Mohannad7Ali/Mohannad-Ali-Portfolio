@@ -25,38 +25,45 @@ const navItems: NavItem[] = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
   const { scrollY } = useScroll();
   const personalInfo = getPersonalInfo();
-  
+
+  //  safer scroll logic
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() || 0;
+
+    // background state
+    setScrolled(latest > 50);
+
+    // hide logic with threshold
     if (latest > previous && latest > 150) {
       setHidden(true);
-    } else {
+    } else if (latest < previous - 5) {
       setHidden(false);
     }
   });
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    
+    document.body.style.overflow = isOpen ? "hidden" : "auto";
+
     return () => {
       document.body.style.overflow = "auto";
     };
   }, [isOpen]);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMenu = () => setIsOpen((prev) => !prev);
   const closeMenu = () => setIsOpen(false);
-  
+
+  // ✅ safe name handling
+  const [firstName = "", lastName = ""] = (personalInfo?.name || "").split(" ");
+
   return (
     <motion.header
       className={cn(
         "fixed top-0 w-full z-40 backdrop-blur-sm transition-all duration-300",
-        scrollY.get() > 50 ? "bg-background/80" : "bg-transparent"
+        scrolled ? "bg-background/80" : "bg-transparent",
       )}
       initial={{ y: 0 }}
       animate={{ y: hidden ? -100 : 0 }}
@@ -69,12 +76,13 @@ export function Navbar() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            {personalInfo.name.split(' ')[0]}<span className="text-primary">{personalInfo.name.split(' ')[1] || ''}</span>
+            {firstName}
+            <span className="text-primary">{lastName}</span>
           </motion.span>
         </Link>
-        
+
         <div className="flex items-center gap-2">
-          {/* Desktop Navigation */}
+          {/* Desktop */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item, i) => (
               <motion.div
@@ -88,17 +96,15 @@ export function Navbar() {
                   asChild
                   className="text-base font-medium rounded-full px-4"
                 >
-                  <Link href={item.href} onClick={closeMenu}>
-                    {item.label}
-                  </Link>
+                  <Link href={item.href}>{item.label}</Link>
                 </Button>
               </motion.div>
             ))}
           </nav>
-          
+
           <ThemeSwitch />
-          
-          {/* Mobile Menu Toggle */}
+
+          {/* Mobile toggle */}
           <Button
             variant="ghost"
             size="icon"
@@ -110,17 +116,14 @@ export function Navbar() {
           </Button>
         </div>
       </div>
-      
-      {/* Mobile Navigation Menu */}
+
+      {/* ✅ improved mobile menu layering */}
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 backdrop-blur-md flex flex-col pt-20 pb-6 px-4 md:hidden"
-          style={{
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-          }}
+          className="fixed inset-0 z-[60] backdrop-blur-md flex flex-col pt-20 pb-6 px-4 md:hidden"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
           <nav className="flex flex-col gap-2">
@@ -142,7 +145,6 @@ export function Navbar() {
               </motion.div>
             ))}
           </nav>
-          <div className="mt-auto"></div>
         </motion.div>
       )}
     </motion.header>
