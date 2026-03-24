@@ -34,13 +34,13 @@ export function LoadingAnimation() {
   // Variants for text animation
   const textVariants = {
     initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.8,
         ease: "easeOut",
-      }
+      },
     },
   };
 
@@ -67,7 +67,7 @@ export function LoadingAnimation() {
           exit="exit"
         >
           <div className="text-center mb-12">
-            <motion.h1 
+            <motion.h1
               className="text-4xl sm:text-5xl md:text-6xl font-bold mb-2"
               variants={textVariants}
               initial="initial"
@@ -76,7 +76,7 @@ export function LoadingAnimation() {
               <span className="inline-block">{firstName}</span>
               <span className="inline-block text-primary ml-2">{lastName}</span>
             </motion.h1>
-            
+
             <motion.p
               className="text-muted-foreground text-lg"
               variants={textVariants}
@@ -87,8 +87,8 @@ export function LoadingAnimation() {
               {personalInfo.title}
             </motion.p>
           </div>
-          
-          <motion.div 
+
+          <motion.div
             className="w-48 h-1 bg-primary/20 rounded-full overflow-hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

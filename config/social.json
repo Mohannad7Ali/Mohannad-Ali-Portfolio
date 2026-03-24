@@ -1,22 +1,17 @@
 [
   {
-    "platform": "GitHub",
-    "url": "https://github.com/killcod3",
-    "icon": "Github"
-  },
-  {
     "platform": "LinkedIn",
-    "url": "https://linkedin.com/in/jawadcodes",
+    "url": "https://linkedin.com/in/mohannad-ali-dev",
     "icon": "Linkedin"
   },
   {
-    "platform": "Twitter",
-    "url": "https://twitter.com",
-    "icon": "Twitter"
+    "platform": "GitHub",
+    "url": "https://github.com/Mohannad7Ali",
+    "icon": "Github"
   },
   {
-    "platform": "Dribbble",
-    "url": "https://dribbble.com",
-    "icon": "Dribbble"
+    "platform": "Email",
+    "url": "mailto:mohannadali.dev@gmail.com",
+    "icon": "Mail"
   }
 ]

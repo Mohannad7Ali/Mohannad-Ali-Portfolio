@@ -14,7 +14,7 @@
       },
       "particleConfig": {
         "enabled": true,
-        "particleCount": 65,
+        "particleCount": 100,
         "color": "hsl(204, 100%, 40%)",
         "linkColor": "hsl(204, 100%, 40%, 0.2)",
         "speed": 0.8,
@@ -42,11 +42,11 @@
       },
       "particleConfig": {
         "enabled": true,
-        "particleCount": 65,
+        "particleCount": 100,
         "color": "hsl(204, 100%, 50%)",
         "linkColor": "hsl(204, 100%, 50%, 0.2)",
-        "speed": 0.8,
-        "size": 3,
+        "speed": 1,
+        "size": 4,
         "shape": "circle",
         "linked": true,
         "opacity": 0.7,
@@ -70,7 +70,7 @@
       },
       "particleConfig": {
         "enabled": true,
-        "particleCount": 65,
+        "particleCount": 100,
         "color": "hsl(175, 70%, 50%)",
         "linkColor": "hsl(175, 70%, 50%, 0.15)",
         "speed": 0.7,

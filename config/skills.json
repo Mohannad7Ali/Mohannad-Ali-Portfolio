@@ -1,7 +1,12 @@
 [
   {
-    "name": "React",
-    "level": 95,
+    "name": "Node.js / Express.js",
+    "level": 90,
+    "category": "backend"
+  },
+  {
+    "name": "Next.js (App Router)",
+    "level": 92,
     "category": "frontend"
   },
   {
@@ -10,38 +15,38 @@
     "category": "frontend"
   },
   {
-    "name": "Next.js",
-    "level": 85,
-    "category": "frontend"
+    "name": "PostgreSQL & Prisma",
+    "level": 88,
+    "category": "backend"
   },
   {
-    "name": "CSS/Tailwind",
+    "name": "Clean Architecture & DI",
+    "level": 85,
+    "category": "backend"
+  },
+  {
+    "name": "Tailwind CSS / Framer Motion",
     "level": 90,
     "category": "frontend"
   },
   {
-    "name": "Node.js",
+    "name": "Redis & Caching",
     "level": 80,
     "category": "backend"
   },
   {
-    "name": "GraphQL",
+    "name": "Docker & Docker Compose",
     "level": 75,
+    "category": "devops"
+  },
+  {
+    "name": "REST & GraphQL APIs",
+    "level": 85,
     "category": "backend"
   },
   {
-    "name": "AWS",
+    "name": "CI/CD (GitHub Actions)",
     "level": 70,
     "category": "devops"
-  },
-  {
-    "name": "Docker",
-    "level": 65,
-    "category": "devops"
-  },
-  {
-    "name": "UI/UX Design",
-    "level": 75,
-    "category": "design"
   }
 ]

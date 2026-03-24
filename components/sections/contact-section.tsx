@@ -17,7 +17,9 @@ import { z } from "zod";
 const contactSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  message: z.string().min(10, { message: "Message must be at least 10 characters." }),
+  message: z
+    .string()
+    .min(10, { message: "Message must be at least 10 characters." }),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -34,12 +36,11 @@ export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    // Clear error when user types
+
     if (errors[name as keyof ContactFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -47,23 +48,59 @@ export function ContactSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       contactSchema.parse(formData);
+
+      // ✅ Check internet first
+      if (!navigator.onLine) {
+        toast({
+          title: "No Internet Connection",
+          description: "Please check your internet and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setIsSubmitting(true);
-      
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
+      // ⏳ Timeout protection (10s)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      // ❌ HTTP error
+      if (!res.ok) {
+        throw new Error("Server error");
+      }
+
+      const data = await res.json();
+
+      // ❌ API responded but failed
+      if (!data.success) {
+        throw new Error("Failed to send message");
+      }
+
+      // ✅ Success
       toast({
-        title: "Message sent!",
+        title: "Message sent! ",
         description: "Thanks for reaching out. I'll get back to you soon.",
       });
-      
-      // Reset form
+
       setFormData({ name: "", email: "", message: "" });
       setErrors({});
-    } catch (error) {
+    } catch (error: any) {
+      // ✅ Validation errors (Zod)
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<ContactFormData> = {};
         error.errors.forEach((err) => {
@@ -72,7 +109,42 @@ export function ContactSection() {
           }
         });
         setErrors(fieldErrors);
+
+        toast({
+          title: "Validation Error",
+          description: "Please check your inputs.",
+          variant: "destructive",
+        });
+
+        return;
       }
+
+      // ❌ Timeout
+      if (error.name === "AbortError") {
+        toast({
+          title: "Request Timeout",
+          description: "Server took too long to respond. Try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // ❌ Network error
+      if (error.message === "Failed to fetch") {
+        toast({
+          title: "Network Error",
+          description: "Unable to connect. Check your internet.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // ❌ Generic error
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -80,131 +152,138 @@ export function ContactSection() {
 
   return (
     <SectionContainer id="contact">
-      <SectionHeading 
-        title="Get In Touch" 
+      <SectionHeading
+        title="Get In Touch"
         subtitle="Have a question or want to work together? Feel free to contact me."
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          <h3 className="text-xl font-semibold mb-6">Contact Information</h3>
-          
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="flex items-center gap-4 p-6">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Mail className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <a href={`mailto:${personalInfo.email}`} className="font-medium hover:text-primary transition-colors">
-                    {personalInfo.email}
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="flex items-center gap-4 p-6">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-medium">{personalInfo.location}</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {personalInfo.phone && (
+        {/* Contact Info */}
+        <div className="overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <h3 className="text-xl font-semibold mb-6">Contact Information</h3>
+            <div className="space-y-6">
               <Card>
                 <CardContent className="flex items-center gap-4 p-6">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-primary" />
+                    <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Phone</p>
-                    <a href={`tel:${personalInfo.phone}`} className="font-medium hover:text-primary transition-colors">
-                      {personalInfo.phone}
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <a
+                      href={`mailto:${personalInfo.email}`}
+                      className="font-medium hover:text-primary transition-colors"
+                    >
+                      {personalInfo.email}
                     </a>
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          <h3 className="text-xl font-semibold mb-6">Send Me a Message</h3>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="Your name"
-                value={formData.name}
-                onChange={handleChange}
-                className={errors.name ? "border-destructive" : ""}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name}</p>
+              <Card>
+                <CardContent className="flex items-center gap-4 p-6">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p className="font-medium">{personalInfo.location}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {personalInfo.phone && (
+                <Card>
+                  <CardContent className="flex items-center gap-4 p-6">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Phone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone</p>
+                      <a
+                        href={`tel:${personalInfo.phone}`}
+                        className="font-medium hover:text-primary transition-colors"
+                      >
+                        {personalInfo.phone}
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Your email"
-                value={formData.email}
-                onChange={handleChange}
-                className={errors.email ? "border-destructive" : ""}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                id="message"
-                name="message"
-                placeholder="Your message"
-                rows={5}
-                value={formData.message}
-                onChange={handleChange}
-                className={errors.message ? "border-destructive" : ""}
-              />
-              {errors.message && (
-                <p className="text-sm text-destructive">{errors.message}</p>
-              )}
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Sending..." : "Send Message"}
-              <Send className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
-        </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Contact Form */}
+        <div className="overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            <h3 className="text-xl font-semibold mb-6">Send Me a Message</h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Your name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={errors.name ? "border-destructive" : ""}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={errors.email ? "border-destructive" : ""}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  placeholder="Your message"
+                  rows={5}
+                  value={formData.message}
+                  onChange={handleChange}
+                  className={errors.message ? "border-destructive" : ""}
+                />
+                {errors.message && (
+                  <p className="text-sm text-destructive">{errors.message}</p>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Sending..." : "Send Message"}
+                <Send className="ml-2 h-4 w-4" />
+              </Button>
+            </form>
+          </motion.div>
+        </div>
       </div>
     </SectionContainer>
   );

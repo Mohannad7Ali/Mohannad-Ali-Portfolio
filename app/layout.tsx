@@ -33,9 +33,13 @@ export default function RootLayout({
   const personalInfo = getPersonalInfo(); // scoped safely
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
       <body
-        className={`${inter.className} bg-background text-foreground`}
+        className={`${inter.className} bg-background text-foreground `}
         suppressHydrationWarning
       >
         <ThemeProvider

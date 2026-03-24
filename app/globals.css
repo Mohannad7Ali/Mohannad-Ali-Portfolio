@@ -73,6 +73,22 @@
 }
 
 @layer base {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  /* يمنع أي عنصر من الخروج عن حدود الجسم */
+  body {
+    position: relative;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* يضمن أن العناصر المرنة لا تتجاوز عرض الشاشة */
+  * {
+    box-sizing: border-box;
+  }
   * {
     @apply border-border;
   }

@@ -73,6 +73,12 @@ export function ParticlesBackground() {
   if (!mounted || !particleConfig) return null;
 
   return (
-    <Particles id="tsparticles" init={particlesInit} options={particleConfig} />
+    <div className="absolute overflow-hidden">
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particleConfig}
+      />
+    </div>
   );
 }
