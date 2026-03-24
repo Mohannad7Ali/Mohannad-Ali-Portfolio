@@ -1,4 +1,4 @@
-# NextGen Portfolio Website
+# My Portfolio Website
 
 A modern, animated portfolio website built with Next.js, TypeScript, Tailwind CSS, and Framer Motion.
 
@@ -19,7 +19,7 @@ A modern, animated portfolio website built with Next.js, TypeScript, Tailwind CS
 
 ## Tech Stack
 
-- **Framework**: Next.js 13.5 with App Router
+- **Framework**: Next.js 15.3 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui
